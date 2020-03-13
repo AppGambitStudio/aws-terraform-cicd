@@ -11,3 +11,5 @@ The setup includes following modules which are configurable.
 - CloudWatch Alarms
 - S3 Bucket
 - CloudTrail
+
+## Environment Variables
