@@ -13,3 +13,5 @@ The setup includes following modules which are configurable.
 - CloudTrail
 
 ## Environment Variables
+
+## Terraform 
