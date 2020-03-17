@@ -1,0 +1,25 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Deny",
+      "Action": [
+        "codecommit:GitPush",
+        "codecommit:DeleteBranch",
+        "codecommit:PutFile",
+        "codecommit:MergePullRequestByFastForward"
+      ],
+      "Resource": "${RESOURCES}",
+      "Condition": {
+        "StringEqualsIfExists": {
+          "codecommit:References": [
+            "refs/heads/master"
+          ]
+        },
+        "Null": {
+          "codecommit:References": false
+        }
+      }
+    }
+  ]
+}

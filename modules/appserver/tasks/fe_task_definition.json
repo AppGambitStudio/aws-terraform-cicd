@@ -1,0 +1,28 @@
+[
+  {
+    "name": "fe",
+    "image": "${image}",
+    "portMappings": [
+      {
+        "containerPort": 8000,
+        "hostPort": 8000
+      }
+    ],
+    "memory": ${fe_container_memory},
+    "networkMode": "awsvpc",
+    "environment": [
+      {
+        "name": "BE_SERVER",
+        "value": "${BE_SERVER}"
+      }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group}",
+        "awslogs-region": "${region}",
+        "awslogs-stream-prefix": "ecs"
+      }
+    }
+  }
+]

@@ -1,0 +1,40 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      docker: 18
+    commands:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+
+      - $(aws ecr get-login --no-include-email --region ${region})
+
+      - REPOSITORY_URI=${ecr_be_repository_url}
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-8)
+      - IMAGE_TAG=$${COMMIT_HASH}
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+
+      - docker build -t ${be_repository_name} .
+      - docker tag ${be_repository_name}:latest ${ecr_be_repository_url}:latest
+
+      - docker build -t ${be_repository_name}:latest .
+      - docker tag ${be_repository_name}:latest ${ecr_be_repository_url}:$${IMAGE_TAG}
+
+  post_build:
+    commands:
+      - echo Pushing the Docker images...
+
+      - docker push ${ecr_be_repository_url}:latest
+      - docker push ${ecr_be_repository_url}:$${IMAGE_TAG}
+
+      - echo Writing image definitions file...
+
+      - printf '[{"name":"be","imageUri":"%s"}]' ${ecr_be_repository_url}:latest > beimagedefinitions.json
+artifacts:
+  files: beimagedefinitions.json

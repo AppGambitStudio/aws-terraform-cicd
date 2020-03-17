@@ -1,0 +1,39 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      docker: 18
+    commands:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+
+      - $(aws ecr get-login --no-include-email --region ${region})
+
+      - REPOSITORY_URI=${ecr_fe_repository_url}
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-8)
+      - IMAGE_TAG=$${COMMIT_HASH:=latest}
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+
+      - docker build -t ${fe_repository_name} .
+      - docker tag ${fe_repository_name}:latest ${ecr_fe_repository_url}:latest
+
+      - docker build -t ${fe_repository_name}:latest .
+      - docker tag ${fe_repository_name}:latest ${ecr_fe_repository_url}:$${IMAGE_TAG}
+
+  post_build:
+    commands:
+      - echo Pushing the Docker images...
+
+      - docker push ${ecr_fe_repository_url}:latest
+      - docker push ${ecr_fe_repository_url}:$${IMAGE_TAG}
+      - echo Writing image definitions file...
+
+      - printf '[{"name":"fe","imageUri":"%s"}]' ${ecr_fe_repository_url}:latest > feimagedefinitions.json
+artifacts:
+  files: feimagedefinitions.json
