@@ -22,6 +22,6 @@ The setup includes following modules which are configurable.
 ## Terraform 
 Follow the [terraform](https://https://www.terraform.io/docs/commands/index.html) documentation to run the setup. 
 
-## Setup Diagram
+## Setup Layout
 
 ![](extra/aws_terraform_cicd.png)
