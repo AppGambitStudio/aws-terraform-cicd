@@ -44,10 +44,6 @@ variable "public_subnet_ids" {
   description = "The public subnets to use"
 }
 
-variable "services_private_namespace_arn" {
-  description = "services private namespace arn"
-}
-
 variable "ecs_execution_role_name" {
   description = "ecs execution role name"
 }

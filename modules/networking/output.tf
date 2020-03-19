@@ -21,7 +21,3 @@ output "security_groups_ids" {
 output "public_route_table" {
   value = "${aws_route_table.public.id}"
 }
-
-output "services_discovery_service_registry_arn" {
-  value = "${aws_service_discovery_service.services_discovery_service.arn}"
-}
