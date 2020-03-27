@@ -90,7 +90,6 @@ module "appserver" {
   security_groups_ids            = "${module.networking.security_groups_ids}"
   subnets_ids                    = ["${module.networking.private_subnets_id}"]
   public_subnet_ids              = ["${module.networking.public_subnets_id}"]
-  services_private_namespace_arn = "${module.networking.services_discovery_service_registry_arn}"
   DB_URL                         = "${module.database.aws_rds_cluster_endpoint}"
   DB_NAME                        = "${module.database.aws_rds_cluster_database_name}"
   DB_USERNAME                    = "${module.database.aws_rds_cluster_master_username}"
