@@ -1,3 +1,7 @@
+locals {
+  target_groups = ["primary", "secondary"]
+}
+
 /*====
 ECR repository to store our Docker images
 ======*/
@@ -410,7 +414,8 @@ resource "random_id" "target_group_sufix" {
 }
 
 resource "aws_alb_target_group" "alb_target_group" {
-  name        = "${var.environment}-alb-target-group-${random_id.target_group_sufix.hex}"
+  count = "${length(local.target_groups)}"
+  name  = "${var.environment}-tg-${element(local.target_groups, count.index)}-fe"
   port        = 8000
   protocol    = "HTTP"
   vpc_id      = "${var.vpc_id}"
@@ -494,7 +499,7 @@ resource "aws_alb_listener" "application" {
   depends_on        = [aws_alb_target_group.alb_target_group]
 
   default_action {
-    target_group_arn = "${aws_alb_target_group.alb_target_group.arn}"
+    target_group_arn = "${aws_alb_target_group.alb_target_group.0.arn}"
     type             = "forward"
   }
 }
@@ -506,14 +511,15 @@ resource "aws_alb_listener" "application1" {
   depends_on        = [aws_alb_target_group.alb_target_group]
 
   default_action {
-    target_group_arn = "${aws_alb_target_group.alb_target_group.arn}"
+    target_group_arn = "${aws_alb_target_group.alb_target_group.0.arn}"
     type             = "forward"
   }
 }
 
 //Loadbalancer
 resource "aws_alb_target_group" "alb_target_group_be" {
-  name        = "${var.environment}-alb-tg-${random_id.target_group_sufix.hex}-be"
+  count = "${length(local.target_groups)}"
+  name  = "${var.environment}-tg-${element(local.target_groups, count.index)}-be"
   port        = 8080
   protocol    = "HTTP"
   vpc_id      = "${var.vpc_id}"
@@ -598,7 +604,7 @@ resource "aws_alb_listener" "application_be" {
   depends_on        = [aws_alb_target_group.alb_target_group_be]
 
   default_action {
-    target_group_arn = "${aws_alb_target_group.alb_target_group_be.arn}"
+    target_group_arn = "${aws_alb_target_group.alb_target_group_be.0.arn}"
     type             = "forward"
   }
 }
@@ -610,7 +616,7 @@ resource "aws_alb_listener" "application_be1" {
   depends_on        = [aws_alb_target_group.alb_target_group_be]
 
   default_action {
-    target_group_arn = "${aws_alb_target_group.alb_target_group_be.arn}"
+    target_group_arn = "${aws_alb_target_group.alb_target_group_be.0.arn}"
     type             = "forward"
   }
 }
@@ -650,7 +656,7 @@ resource "aws_ecs_service" "fe" {
   }
 
   load_balancer {
-    target_group_arn = "${aws_alb_target_group.alb_target_group.arn}"
+    target_group_arn = "${aws_alb_target_group.alb_target_group.0.arn}"
     container_name   = "fe"
     container_port   = "8000"
   }
@@ -678,8 +684,12 @@ resource "aws_ecs_service" "be" {
     subnets         = flatten(["${var.subnets_ids}"])
   }
 
+  deployment_controller {
+    type = "CODE_DEPLOY"
+  }
+
   load_balancer {
-    target_group_arn = "${aws_alb_target_group.alb_target_group_be.arn}"
+    target_group_arn = "${aws_alb_target_group.alb_target_group_be.0.arn}"
     container_name   = "be"
     container_port   = "8080"
   }

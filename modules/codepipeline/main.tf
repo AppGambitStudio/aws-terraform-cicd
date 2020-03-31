@@ -23,7 +23,7 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
   role   = "${aws_iam_role.codepipeline_role.id}"
 }
 
-resource "aws_codepipeline" "codepipeline" {
+resource "aws_codepipeline" "codepipeline_fe" {
   name     = "${var.random_id_prefix}-${var.fe_pipeline_name}-fe"
   role_arn = "${aws_iam_role.codepipeline_role.arn}"
 
@@ -72,10 +72,10 @@ resource "aws_codepipeline" "codepipeline" {
     name = "Deployment"
 
     action {
-      name     = "${var.first_buildproject_name}"
-      category = "Deploy"
-      owner    = "AWS"
-      provider = "ECS"
+      name            = "${var.first_buildproject_name}"
+      category        = "Deploy"
+      owner           = "AWS"
+      provider        = "ECS"
       input_artifacts = ["buildout1"]
       version         = "1"
 
@@ -86,10 +86,11 @@ resource "aws_codepipeline" "codepipeline" {
       }
     }
   }
+
 }
 
-resource "aws_codepipeline" "codepipeline2" {
-  name     = "${var.random_id_prefix}-${var.be_pipeline_name}-be"
+resource "aws_codepipeline" "codepipeline_blueg-reen_be" {
+  name     = "${var.random_id_prefix}-${var.be_pipeline_name}-blue-green-be"
   role_arn = "${aws_iam_role.codepipeline_role.arn}"
 
   artifact_store {
@@ -134,20 +135,23 @@ resource "aws_codepipeline" "codepipeline2" {
   }
 
   stage {
-    name = "Deployment"
+    name = "Deploy"
 
     action {
-      name            = "${var.second_buildproject_name}"
+      name            = "ExternalDeploy"
       category        = "Deploy"
       owner           = "AWS"
-      provider        = "ECS"
+      provider        = "CodeDeployToECS"
       input_artifacts = ["buildout2"]
       version         = "1"
 
       configuration = {
-        ClusterName = "${var.cluster_name}"
-        ServiceName = "${var.be_service_name}"
-        FileName    = "beimagedefinitions.json"
+        ApplicationName                = "${var.be_service_name}-service-deploy"
+        DeploymentGroupName            = "${var.be_service_name}-service-deploy-group"
+        TaskDefinitionTemplateArtifact = "buildout2"
+        # TaskDefinitionTemplatePath     = "feimagedefinitions.json"
+        AppSpecTemplateArtifact = "buildout2"
+        # AppSpecTemplatePath            = "appspec.yaml"
       }
     }
   }

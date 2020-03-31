@@ -32,8 +32,18 @@ phases:
 
       - docker push ${ecr_fe_repository_url}:latest
       - docker push ${ecr_fe_repository_url}:$${IMAGE_TAG}
+
       - echo Writing image definitions file...
+
+      # - aws ecs describe-task-definition --task-definition production-fe | jq '.taskDefinition.containerDefinitions' > taskdef.json
+
+      - aws ecs describe-task-definition --task-definition production-fe | jq '.taskDefinition' > taskdef.json
+
+      - envsubst < appspec_template.yaml > appspec.yaml
 
       - printf '[{"name":"fe","imageUri":"%s"}]' ${ecr_fe_repository_url}:latest > feimagedefinitions.json
 artifacts:
-  files: feimagedefinitions.json
+  files:
+    - appspec.yaml
+    - feimagedefinitions.json
+    - taskdef.json

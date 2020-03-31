@@ -2,6 +2,10 @@ variable "region" {
   description = "AWS region..."
 }
 
+variable "environment" {
+  description = "environment"
+}
+
 variable "random_id_prefix" {
   description = "random prefix"
 }

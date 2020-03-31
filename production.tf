@@ -10,7 +10,6 @@ locals {
 
 provider "aws" {
   region  = "${var.region}"
-  profile = "prashant_appgambit"
 }
 
 module "networking" {
@@ -44,21 +43,52 @@ module "codecommit" {
 module "codebuild" {
   source = "./modules/codebuild"
 
-  region                   = "${var.region}"
-  random_id_prefix         = "${random_id.random_id_prefix.hex}"
-  first_buildproject_name  = "${var.first_buildproject_name}"
-  second_buildproject_name = "${var.second_buildproject_name}"
-  ecr_fe_repository_url    = "${module.appserver.fe_repository_url}"
-  ecr_be_repository_url    = "${module.appserver.be_repository_url}"
-  fe_repository_name       = "${module.appserver.fe_repository_name}"
-  be_repository_name       = "${module.appserver.be_repository_name}"
+  region                        = "${var.region}"
+  environment                   = "${var.environment}"
+  random_id_prefix              = "${random_id.random_id_prefix.hex}"
+  first_buildproject_name       = "${var.first_buildproject_name}"
+  second_buildproject_name      = "${var.second_buildproject_name}"
+  ecr_fe_repository_url         = "${module.appserver.fe_repository_url}"
+  ecr_be_repository_url         = "${module.appserver.be_repository_url}"
+  fe_repository_name            = "${module.appserver.fe_repository_name}"
+  be_repository_name            = "${module.appserver.be_repository_name}"
+  fe_container_memory           = "${var.fe_container_memory}"
+  be_container_memory           = "${var.be_container_memory}"
+  security_groups_ids           = "${module.networking.security_groups_ids}"
+  ecs_security_group_id         = "${module.appserver.security_group_id}"
+  subnets_id_1                  = "${module.networking.private_subnet_1}"
+  public_subnet_id_1            = "${module.networking.public_subnet_1}"
+  subnets_id_2                  = "${module.networking.private_subnet_2}"
+  public_subnet_id_2            = "${module.networking.public_subnet_2}"
+  ecs_fe_task_defination_family = "${module.appserver.ecs_fe_task_defination_family}"
+  ecs_be_task_defination_family = "${module.appserver.ecs_be_task_defination_family}"
+}
 
+module "codedeploy" {
+  source = "./modules/codedeploy"
+
+  region                     = "${var.region}"
+  random_id_prefix           = "${random_id.random_id_prefix.hex}"
+  environment                = "${var.environment}"
+  ecs_execution_role_arn     = "${module.appserver.ecs_execution_role_arn}"
+  ecs_cluster_name           = "${module.appserver.cluster_name}"
+  ecs_service_name           = "${module.appserver.fe_service_name}"
+  be_service_name            = "${module.appserver.be_service_name}"
+  aws_alb_target_group_arn_1 = "${module.appserver.aws_alb_target_group_arn_1}"
+  aws_alb_target_group_arn_2 = "${module.appserver.aws_alb_target_group_arn_2}"
+  alb_target_group_be_arn_1  = "${module.appserver.alb_target_group_be_arn_1}"
+  alb_target_group_be_arn_2  = "${module.appserver.alb_target_group_be_arn_2}"
+  aws_alb_listener_1_arn     = "${module.appserver.aws_alb_listener_1_arn}"
+  aws_alb_listener_2_arn     = "${module.appserver.aws_alb_listener_2_arn}"
+  be_alb_listener_1_arn      = "${module.appserver.be_alb_listener_1_arn}"
+  be_alb_listener_2_arn      = "${module.appserver.be_alb_listener_2_arn}"
 }
 
 module "codepipeline" {
   source = "./modules/codepipeline"
 
   region                       = "${var.region}"
+  environment                  = "${var.environment}"
   random_id_prefix             = "${random_id.random_id_prefix.hex}"
   fe_pipeline_name             = "${var.fe_pipeline_name}"
   fe_repo_BranchName           = "${var.fe_repo_BranchName}"

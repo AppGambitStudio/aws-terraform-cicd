@@ -98,7 +98,7 @@ resource "aws_rds_cluster" "this" {
   iam_database_authentication_enabled = "${var.iam_database_authentication_enabled}"
   backtrack_window                    = "${var.backtrack_window}"
   copy_tags_to_snapshot               = "${var.copy_tags_to_snapshot}"
-  deletion_protection                 = "${var.deletion_protection}"
+  # deletion_protection                 = "${var.deletion_protection}"
 
   scaling_configuration {
     auto_pause               = "${var.auto_pause}"

@@ -35,6 +35,15 @@ phases:
 
       - echo Writing image definitions file...
 
+      # - aws ecs describe-task-definition --task-definition production-be | jq '.taskDefinition.containerDefinitions' > taskdef.json
+
+      - aws ecs describe-task-definition --task-definition production-be | jq '.taskDefinition' > taskdef.json
+
+      - envsubst < appspec_template.yaml > appspec.yaml
+
       - printf '[{"name":"be","imageUri":"%s"}]' ${ecr_be_repository_url}:latest > beimagedefinitions.json
 artifacts:
-  files: beimagedefinitions.json
+  files:
+    - appspec.yaml
+    - beimagedefinitions.json
+    - taskdef.json
